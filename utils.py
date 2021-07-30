@@ -3,7 +3,7 @@ import torch
 import random
 from collections import Counter
 
-unk_string = "UUUNKKK"
+unk_string = "<unk>"
 
 def get_ngrams(examples, share_vocab, max_len=200000, n=3):
     def update_counter(counter, sentence):
@@ -139,16 +139,14 @@ class Batch(object):
         self.p2_l = None
 
 class BigExample(object):
-    def __init__(self, arr, vocab, rev_vocab, scramble_rate):
+    def __init__(self, arr, scramble_rate):
         self.arr = arr
-        self.sentence = [rev_vocab[i] for i in arr]
-        self.sentence = " ".join(self.sentence)
         self.embeddings = [i for i in arr]
         if scramble_rate:
             if random.random() <= scramble_rate:
                 random.shuffle(self.embeddings)
         if len(self.embeddings) == 0:
-            self.embeddings = [vocab[unk_string]]
+            self.embeddings = [0]
 
 class Example(object):
     def __init__(self, sentence, lower_case):

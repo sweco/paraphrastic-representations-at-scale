@@ -108,10 +108,8 @@ def compute_loss_one_batch(model):
             arr = [model.data[t] for t in i]
             example_arr = []
             for j in arr:
-                example = (BigExample(j[0], model.vocab, model.rev_vocab, model.scramble_rate),
-                           BigExample(j[1], model.vocab, model.rev_vocab, model.scramble_rate))
-                if model.args.debug:
-                    print("Logging Pairing: {0} {1}".format(j[0].sentence, j[1].sentence))
+                example = (BigExample(j[0], model.scramble_rate),
+                           BigExample(j[1], model.scramble_rate))
 
                 example_arr.append(example)
             megabatch.append(example_arr)

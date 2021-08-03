@@ -50,7 +50,7 @@ def batcher(params, batch):
         p = params.sp.EncodeAsPieces(p)
         p = " ".join(p)
         p = Example(p, params.lower_case)
-        p.populate_embeddings(params.model.vocab, params.model.zero_unk, params.model.ngrams)
+        p.populate_embeddings(params.sp)
         new_batch.append(p)
     x, l = params.model.torchify_batch(new_batch)
     vecs = params.model.encode(x, l)

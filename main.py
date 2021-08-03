@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--data-file", default='preprocess/paranmt/paranmt.sim-low=0.4-sim-high=1.0-ovl=0.7.final.h5', help="training data")
 parser.add_argument("--vocab-file", default='preprocess/paranmt/paranmt.vocab', help="vocab file")
-parser.add_argument("--gpu", default=0, type=int, help="whether to train on gpu")
+parser.add_argument("--gpu", default=1, type=int, help="whether to train on gpu")
 parser.add_argument("--dim", default=1024, type=int, help="dimension of input embeddings")
 parser.add_argument("--model", default="avg", help="type of base model to train.")
 parser.add_argument("--grad-clip", default=5.0, type=float, help='clip threshold of gradients')
@@ -47,25 +47,11 @@ parser.add_argument("--debug", type=int, default=0, help="debug mode")
 
 args = parser.parse_args()
 
-
-def load_vocab(f):
-    f = open(f, 'r')
-    lines = f.readlines()
-    vocab = {}
-    for i in lines:
-        i = i.strip()
-        i = i.split("\t")
-        vocab[i[0]] = len(vocab)
-    vocab[unk_string] = len(vocab)
-    return vocab
-
-
 assert args.ngrams == 0
 assert args.share_vocab == 1
 
 data = h5py.File(args.data_file, 'r')
 data = data['data']
-vocab = load_vocab(args.vocab_file)
 
 
 if __name__ == '__main__':
@@ -74,7 +60,7 @@ if __name__ == '__main__':
         print("Loaded model at epoch {0} and resuming training.".format(epoch))
         model.train_epochs(start_epoch=epoch)
     else:
-        model = Averaging(data, args, vocab)
+        model = Averaging(data, args)
 
     print(" ".join(sys.argv))
     print("Num examples:", len(data))

@@ -21,7 +21,6 @@ def load_model(data, args):
 
     state_dict = model['state_dict']
     model_args = model['args']
-    vocab = model['vocab']
     optimizer = model['optimizer']
     epoch = model['epoch'] + 1
 
@@ -31,7 +30,7 @@ def load_model(data, args):
         model_args.megabatch_anneal = args.megabatch_anneal
     model_args.gpu = args.gpu
 
-    model = Averaging(data, model_args, vocab)
+    model = Averaging(data, model_args)
 
     model.load_state_dict(state_dict)
     model.optimizer.load_state_dict(optimizer)
@@ -40,7 +39,7 @@ def load_model(data, args):
 
 
 class ParaModel(nn.Module):
-    def __init__(self, data, args, vocab):
+    def __init__(self, data, args):
         super(ParaModel, self).__init__()
 
         self.data = data
@@ -52,7 +51,6 @@ class ParaModel(nn.Module):
         else:
             self.report_interval = args.save_interval
 
-        self.vocab = vocab
         self.ngrams = args.ngrams
 
         self.delta = args.delta
@@ -193,8 +191,8 @@ class ParaModel(nn.Module):
 
 
 class Averaging(ParaModel):
-    def __init__(self, data, args, vocab):
-        super(Averaging, self).__init__(data, args, vocab)
+    def __init__(self, data, args):
+        super(Averaging, self).__init__(data, args)
         self.parameters = self.parameters()
         self.optimizer = optim.Adam(self.parameters, lr=self.args.lr)
 

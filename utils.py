@@ -155,37 +155,5 @@ class Example(object):
             self.sentence = self.sentence.lower()
         self.embeddings = []
 
-    def populate_ngrams(self, sentence, words, zero_unk, n):
-        sentence = " " + sentence.strip() + " "
-        embeddings = []
-
-        for j in range(len(sentence)):
-            idx = j
-            gr = ""
-            while idx < j + n and idx < len(sentence):
-                gr += sentence[idx]
-                idx += 1
-            if not len(gr) == n:
-                continue
-            wd = lookup(words, gr, zero_unk)
-            if wd is not None:
-                embeddings.append(wd)
-
-        if len(embeddings) == 0:
-            return [words[unk_string]]
-        return embeddings
-
-    def populate_embeddings(self, words, zero_unk, ngrams, scramble_rate=0):
-        if ngrams:
-            self.embeddings = self.populate_ngrams(self.sentence, words, zero_unk, ngrams)
-        else:
-            arr = self.sentence.split()
-            if scramble_rate:
-                if random.random() <= scramble_rate:
-                    random.shuffle(arr)
-            for i in arr:
-                wd = lookup(words, i, zero_unk)
-                if wd is not None:
-                    self.embeddings.append(wd)
-            if len(self.embeddings) == 0:
-                self.embeddings = [words[unk_string]]
+    def populate_embeddings(self, sp):
+        self.embeddings = sp.EncodeAsIds(self.sentence)

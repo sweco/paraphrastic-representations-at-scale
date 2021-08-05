@@ -5,7 +5,7 @@ import numpy as np
 import logging
 from sacremoses import MosesTokenizer
 from utils import Example
-
+import evaluate_model
 from scipy.stats import spearmanr, pearsonr
 
 def cosine(u, v):
@@ -264,33 +264,35 @@ def evaluate_sts(model, params):
                      params=params, model=model, lower_case=params.lower_case,
                      tokenize=params.tokenize)
 
-    s = STS12Eval('STS/STS12-en-test')
+    s = STS12Eval('./data/STS/STS12-en-test')
     s.do_prepare()
     results = s.run(args, batcher)
-    s = STS13Eval('STS/STS13-en-test')
+    s = STS13Eval('./data/STS/STS13-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STS14Eval('STS/STS14-en-test')
+    s = STS14Eval('./data/STS/STS14-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STS15Eval('STS/STS15-en-test')
+    s = STS15Eval('./data/STS/STS15-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STS16Eval('STS/STS16-en-test')
+    s = STS16Eval('./data/STS/STS16-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = SemEval17('STS/STS17-test')
+    s = SemEval17('./data/STS/STS17-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STSBenchmarkEval('STS/STSBenchmark')
+    s = STSBenchmarkEval('./data/STS/STSBenchmark')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STSHard('STS/STSHard')
+    s = STSHard('./data/STS/STSHard')
     s.do_prepare()
     results.update(s.run(args, batcher))
+    slido_valid_result = evaluate_model.eval(model, evaluate_model.slido_dataset, dev='valid')
 
     for i in results:
         print(i, results[i])
+    print("Slido valid", "Spearman rank cosine similarity: {0}\n".format(slido_valid_result))
 
     total = []
     all = []
@@ -299,6 +301,7 @@ def evaluate_sts(model, params):
             total.append(results[i]["pearson"][0])
         if "STS" in i and "all" in i:
             all.append(results[i]["pearson"]["mean"])
+
     print("Average (datasets): {0}".format(np.mean(total)))
     print("Average (comps): {0}".format(np.mean(all)))
 

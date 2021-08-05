@@ -18,13 +18,13 @@ parser.add_argument("--vocab-file", required=True, help="vocab file")
 parser.add_argument("--gpu", default=1, type=int, help="whether to train on gpu")
 parser.add_argument("--dim", default=300, type=int, help="dimension of input embeddings")
 parser.add_argument("--model", default="avg", choices=["avg", "lstm"], help="type of base model to train.")
-parser.add_argument("--grad-clip", default=5., type=float, help='clip threshold of gradients')
-parser.add_argument("--epochs", default=10, type=int, help="number of epochs to train")
+parser.add_argument("--grad-clip", default=5.0, type=float, help='clip threshold of gradients')
+parser.add_argument("--epochs", default=5, type=int, help="number of epochs to train")
 parser.add_argument("--lr", default=0.001, type=float, help="learning rate")
 parser.add_argument("--dropout", default=0., type=float, help="dropout rate")
-parser.add_argument("--batchsize", default=128, type=int, help="size of batches")
-parser.add_argument("--megabatch-size", default=60, type=int, help="number of batches in megabatch")
-parser.add_argument("--megabatch-anneal", default=150., type=int, help="rate of megabatch annealing in terms of "
+parser.add_argument("--batchsize", default=64, type=int, help="size of batches")
+parser.add_argument("--megabatch-size", default=1, type=int, help="number of batches in megabatch")
+parser.add_argument("--megabatch-anneal", default=0, type=int, help="rate of megabatch annealing in terms of "
                                                                        "number of batches to process before incrementing")
 parser.add_argument("--pool", default="mean", choices=["mean", "max"], help="type of pooling")
 parser.add_argument("--zero-unk", default=1, type=int, help="whether to ignore unknown tokens")
@@ -66,18 +66,21 @@ data = data['data']
 vocab = load_vocab(args.vocab_file)
 vocab_fr = None
 
-if args.load_file is not None:
-    model, epoch = load_model(data, args)
-    print("Loaded model at epoch {0} and resuming training.".format(epoch))
-    model.train_epochs(start_epoch=epoch)
-else:
-    if args.model == "avg":
-        model = Averaging(data, args, vocab, vocab_fr)
-    elif args.model == "lstm":
-        model = LSTM(data, args, vocab, vocab_fr)
 
-    print(" ".join(sys.argv))
-    print("Num examples:", len(data))
-    print("Num words:", len(vocab))
+if __name__ == '__main__':
+    if args.load_file is not None:
+        model, epoch = load_model(data, args, True)
+        print("Loaded model at epoch {0} and resuming training.".format(epoch))
+        model.train_epochs(start_epoch=epoch)
+    else:
+        if args.model == "avg":
+            model = Averaging(data, args, vocab, vocab_fr)
+        elif args.model == "lstm":
+            model = LSTM(data, args, vocab, vocab_fr)
 
-    model.train_epochs()
+        print(" ".join(sys.argv))
+        print("Num examples:", len(data))
+        print("Num words:", len(vocab))
+
+        model.train_epochs()
+

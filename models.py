@@ -12,14 +12,17 @@ from torch.nn.utils.rnn import pack_padded_sequence as pack
 from evaluate_sts import evaluate_sts
 from torch import optim
 
-def load_model(data, args):
+def load_model(data, args, training):
     if not args.gpu:
         model = torch.load(args.load_file, map_location=torch.device('cpu'))
     else:
         model = torch.load(args.load_file)
 
     state_dict = model['state_dict']
-    model_args = model['args']
+    if training:
+        model_args = args
+    else:
+        model_args = model['args']
     vocab = model['vocab']
     vocab_fr = model['vocab_fr']
     optimizer = model['optimizer']
@@ -94,14 +97,14 @@ class ParaModel(nn.Module):
                     'vocab_fr': self.vocab_fr,
                     'args': self.args,
                     'optimizer': self.optimizer.state_dict(),
-                    'epoch': epoch}, "{0}_{1}.pt".format(self.args.outfile, epoch))
+                    'epoch': epoch}, "./outputs/{0}_{1}.pt".format(self.args.outfile, epoch))
         else:
             torch.save({'state_dict': self.state_dict(),
                     'vocab': self.vocab,
                     'vocab_fr': self.vocab_fr,
                     'args': self.args,
                     'optimizer': self.optimizer.state_dict(),
-                    'epoch': epoch, 'counter': counter}, "{0}_{1}_{2}.pt".format(self.args.outfile, epoch, counter))
+                    'epoch': epoch, 'counter': counter}, "./outputs/{0}_{1}_{2}.pt".format(self.args.outfile, epoch, counter))
 
     def torchify_batch(self, batch):
         max_len = 0
@@ -156,7 +159,7 @@ class ParaModel(nn.Module):
         self.train()
 
         try:
-            for ep in range(start_epoch, self.args.epochs+1):
+            for ep in range(start_epoch, start_epoch + self.args.epochs):
                 self.mb = utils.get_minibatches_idx(len(self.data), self.args.batchsize, shuffle=True)
                 self.curr_idx = 0
                 self.ep_loss = 0

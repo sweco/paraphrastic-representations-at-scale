@@ -1,7 +1,5 @@
-import argparse
 import numpy as np
 from sacremoses import MosesTokenizer
-from models import load_model
 from utils import Example
 
 def cosine(u, v):
@@ -12,12 +10,10 @@ class FileSim(object):
     def __init__(self):
         self.similarity = lambda s1, s2: np.nan_to_num(cosine(np.nan_to_num(s1), np.nan_to_num(s2)))
 
-    def score(self, params, batcher, f):
-        f = open(f, 'r')
-        lines = f.readlines()
+    def score(self, params, batcher, pairs_of_sentences):
         input1 = []
         input2 = []
-        for i in lines:
+        for i in pairs_of_sentences:
             i = i.strip().split("\t")
             s1 = i[0].strip()
             s2 = i[1].strip()
@@ -56,35 +52,20 @@ def batcher(params, batch):
     vecs = params.model.encode(x, l)
     return vecs.detach().cpu().numpy()
 
-def evaluate(args, model):
-
+def evaluate(args, model, data):
     entok = MosesTokenizer(lang='en')
 
     from argparse import Namespace
 
     new_args = Namespace(batch_size=32, entok=entok, sp=model.sp,
-                     params=args, model=model, lower_case=model.args.lower_case,
-                     tokenize=model.args.tokenize)
+                         params=args, model=model,
+                         lower_case=model.args.lower_case,
+                         tokenize=model.args.tokenize)
     s = FileSim()
-    scores = s.score(new_args, batcher, args.sentence_pair_file)
+    scores = s.score(new_args, batcher, data)
 
-    f = open(args.sentence_pair_file, 'r')
-    lines = f.readlines()
+    #for i in range(len(scores)):
+    #   print(data[i].strip() + "\t{0}".format(scores[i]))
 
-    for i in range(len(scores)):
-        print(lines[i].strip() + "\t{0}".format(scores[i]))
+    return scores
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--load-file", help="path to saved model")
-    parser.add_argument("--sp-model", help="sentencepiece model to use")
-    parser.add_argument("--gpu", default=1, type=int, help="whether to train on gpu")
-    parser.add_argument("--sentence-pair-file", help="sentence file")
-
-    args = parser.parse_args()
-
-    model, _ = load_model(None, args)
-    model.eval()
-    evaluate(args, model)

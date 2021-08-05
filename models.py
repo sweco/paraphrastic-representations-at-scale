@@ -11,7 +11,9 @@ from torch.nn.utils.rnn import pad_packed_sequence as unpack
 from torch.nn.utils.rnn import pack_padded_sequence as pack
 from evaluate_sts import evaluate_sts
 from torch import optim
+import os
 
+output_model_path = os.environ.get('SM_MODEL_DIR', '../outputs')
 
 def load_model(data, args):
     if not args.gpu:
@@ -82,12 +84,12 @@ class ParaModel(nn.Module):
             torch.save({'state_dict': self.state_dict(),
                     'args': self.args,
                     'optimizer': self.optimizer.state_dict(),
-                    'epoch': epoch}, "{0}_{1}.pt".format(self.args.outfile, epoch))
+                    'epoch': epoch}, f"{output_model_path}/{self.args.outfile}_{epoch}.pt")
         else:
             torch.save({'state_dict': self.state_dict(),
                     'args': self.args,
                     'optimizer': self.optimizer.state_dict(),
-                    'epoch': epoch, 'counter': counter}, "{0}_{1}_{2}.pt".format(self.args.outfile, epoch, counter))
+                    'epoch': epoch, 'counter': counter}, f"{output_model_path}/{self.args.outfile}_{epoch}_{counter}.pt".format(self.args.outfile, epoch, counter))
 
     def torchify_batch(self, batch):
         max_len = 0

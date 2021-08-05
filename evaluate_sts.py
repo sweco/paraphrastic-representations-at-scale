@@ -8,6 +8,8 @@ from utils import Example
 
 from scipy.stats import spearmanr, pearsonr
 
+sts_location = os.environ.get('SM_CHANNEL_STS', '../../datasets/STS')
+
 def cosine(u, v):
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 
@@ -262,28 +264,28 @@ def evaluate_sts(model, params):
                      params=params, model=model, lower_case=params.lower_case,
                      tokenize=params.tokenize)
 
-    s = STS12Eval('STS/STS12-en-test')
+    s = STS12Eval(f'{sts_location}/STS12-en-test')
     s.do_prepare()
     results = s.run(args, batcher)
-    s = STS13Eval('STS/STS13-en-test')
+    s = STS13Eval(f'{sts_location}/STS13-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STS14Eval('STS/STS14-en-test')
+    s = STS14Eval(f'{sts_location}/STS14-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STS15Eval('STS/STS15-en-test')
+    s = STS15Eval(f'{sts_location}/STS15-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STS16Eval('STS/STS16-en-test')
+    s = STS16Eval(f'{sts_location}/STS16-en-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = SemEval17('STS/STS17-test')
+    s = SemEval17(f'{sts_location}/STS17-test')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STSBenchmarkEval('STS/STSBenchmark')
+    s = STSBenchmarkEval(f'{sts_location}/STSBenchmark')
     s.do_prepare()
     results.update(s.run(args, batcher))
-    s = STSHard('STS/STSHard')
+    s = STSHard(f'{sts_location}/STSHard')
     s.do_prepare()
     results.update(s.run(args, batcher))
 
